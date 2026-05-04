@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enough — a quiet daily journal</title>
+<meta name="description" content="Enough is a quiet daily journal. Once a day, it asks you something small. That's all.">
+<meta property="og:title" content="Enough">
+<meta property="og:description" content="A quiet daily journal. Once a day, it asks you something small. That's all.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f4ede0;
+    --paper-deep: #ebe2d0;
+    --ink: #2a2419;
+    --ink-soft: #6b5d4a;
+    --ink-faint: #a0937a;
+    --warmth: #c4634a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(196, 99, 74, 0.04) 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(107, 93, 74, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* paper grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* tiny header — barely there */
+  .topbar {
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  .topbar a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.5s ease;
+  }
+
+  .topbar a:hover { color: var(--ink); }
+
+  /* hero — the poster */
+  .hero {
+    min-height: calc(100vh - 6rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 2.5rem 4rem;
+    max-width: 760px;
+    margin: 0 auto;
+    animation: settle 1.4s ease-out;
+  }
+
+  @keyframes settle {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wordmark {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(4rem, 14vw, 8rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 3rem;
+    color: var(--ink);
+  }
+
+  .wordmark .dot {
+    color: var(--warmth);
+    font-weight: 400;
+  }
+
+  .pitch {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    line-height: 1.45;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+    margin-bottom: 4rem;
+    max-width: 560px;
+  }
+
+  .pitch span { display: block; }
+  .pitch span + span { margin-top: 0.4rem; }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.5rem 1rem 1.25rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition: background 0.4s ease, transform 0.4s ease;
+    margin-bottom: 1rem;
+  }
+
+  .cta:hover {
+    background: var(--warmth);
+  }
+
+  .cta-mark {
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .cta-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    display: block;
+  }
+
+  /* gentle scroll cue */
+  .scroll-cue {
+    margin-top: 5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--ink-faint);
+    opacity: 0;
+    animation: cueRise 2s ease-out 1.5s forwards;
+  }
+
+  @keyframes cueRise {
+    to { opacity: 1; }
+  }
+
+  .scroll-cue::before {
+    content: '↓ ';
+    margin-right: 0.5rem;
+  }
+
+  /* body sections — for those who scroll */
+  .section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 6rem 2.5rem;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+    background: var(--warmth);
+  }
+
+  .manifesto p {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+
+  .manifesto p.lead {
+    font-style: italic;
+    font-size: 1.55rem;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+  }
+
+  /* screenshots — small, respectful, side by side */
+  .glimpse {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 4rem 0 2rem;
+  }
+
+  .glimpse-card {
+    aspect-ratio: 9 / 16;
+    background: var(--paper-deep);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 6px 24px rgba(42, 36, 25, 0.06);
+    border: 1px solid rgba(160, 147, 122, 0.15);
+  }
+
+  .glimpse-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-faint);
+    margin-bottom: 2rem;
+  }
+
+  .glimpse-prompt {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.15rem;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 2.5rem;
+  }
+
+  .glimpse-line {
+    width: 70%;
+    height: 1px;
+    background: var(--ink-faint);
+    margin: 0 auto;
+  }
+
+  .glimpse-card.archive {
+    text-align: left;
+    justify-content: flex-start;
+    padding-top: 2.5rem;
+  }
+
+  .glimpse-archive-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .glimpse-archive-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+
+  .glimpse-entry {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(160, 147, 122, 0.2);
+  }
+
+  .glimpse-entry:last-child { border-bottom: none; }
+
+  .glimpse-entry-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-faint);
+    padding-top: 0.15rem;
+  }
+
+  .glimpse-entry-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  /* questions section */
+  .questions .q {
+    padding: 1.75rem 0;
+    border-bottom: 1px solid rgba(160, 147, 122, 0.25);
+  }
+
+  .questions .q:last-child { border-bottom: none; }
+
+  .questions .q-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.75rem;
+  }
+
+  .questions .a-text {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* what this isn't */
+  .nots {
+    margin-top: 1rem;
+  }
+
+  .nots-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+
+  .nots-list li {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    padding: 0.7rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .nots-list li::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    background: var(--warmth);
+    flex-shrink: 0;
+  }
+
+  /* closing */
+  .closing {
+    text-align: center;
+    padding: 6rem 2.5rem 4rem;
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  .closing-line {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 3rem;
+  }
+
+  /* footer — minimal */
+  footer {
+    padding: 3rem 2.5rem 2.5rem;
+    max-width: 760px;
+    margin: 0 auto;
+    border-top: 1px solid rgba(160, 147, 122, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer .left {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  footer .right {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  footer a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-faint);
+    text-decoration: none;
+    transition: color 0.4s ease;
+  }
+
+  footer a:hover { color: var(--ink); }
+
+  /* responsive */
+  @media (max-width: 640px) {
+    .topbar { padding: 1.5rem 1.5rem; }
+    .hero { padding: 1rem 1.5rem 3rem; }
+    .section { padding: 4rem 1.5rem; }
+    .closing { padding: 4rem 1.5rem 3rem; }
+    footer { padding: 2.5rem 1.5rem 2rem; flex-direction: column; align-items: flex-start; }
+    .glimpse { grid-template-columns: 1fr; gap: 1.5rem; max-width: 280px; margin: 3rem auto; }
+    .pitch { margin-bottom: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- topbar -->
+  <div class="topbar">
+    <div class="mark">enough</div>
+    <a href="#why">why</a>
+  </div>
+
+  <!-- hero / poster -->
+  <section class="hero">
+    <h1 class="wordmark">enough<span class="dot">.</span></h1>
+    <div class="pitch">
+      <span>a quiet daily journal.</span>
+      <span>once a day, it asks you something small.</span>
+      <span>that's all.</span>
+    </div>
+    <div>
+      <a href="#" class="cta">
+        <span class="cta-mark"></span>
+        <span>download for ios</span>
+      </a>
+      <span class="cta-price">$9.99 · pay once · no subscription</span>
+    </div>
+    <div class="scroll-cue">if you'd like to know more</div>
+  </section>
+
+  <!-- manifesto -->
+  <section class="section manifesto" id="why">
+    <div class="section-label">why</div>
+    <p class="lead">If life is going well, that itself is a great accomplishment.</p>
+    <p>Most apps are built on the quiet assumption that you are lacking something — that you should be doing more, tracking more, optimizing more. This one isn't.</p>
+    <p>Once a day, Enough asks you a small question. You answer in a sentence. Then it closes. There is nothing else to do.</p>
+    <p>After a few months, you can scroll back and see what your life has actually been — not the highlights, not the wins, just the ordinary good. Most people don't realize when they're already fine.</p>
+  </section>
+
+  <!-- glimpse / screenshots -->
+  <section class="section">
+    <div class="section-label">a glimpse</div>
+    <div class="glimpse">
+      <div class="glimpse-card">
+        <div class="glimpse-date">sunday, may 3</div>
+        <div class="glimpse-prompt">What was steady today?</div>
+        <div class="glimpse-line"></div>
+      </div>
+      <div class="glimpse-card archive">
+        <div class="glimpse-archive-label">an archive of ordinary days</div>
+        <div class="glimpse-archive-title">look at all of this.</div>
+        <div class="glimpse-entry">
+          <div class="glimpse-entry-date">may 2</div>
+          <div class="glimpse-entry-text">a quiet day at work</div>
+        </div>
+        <div class="glimpse-entry">
+          <div class="glimpse-entry-date">apr 28</div>
+          <div class="glimpse-entry-text">mom called, just to say hi</div>
+        </div>
+        <div class="glimpse-entry">
+          <div class="glimpse-entry-date">apr 25</div>
+          <div class="glimpse-entry-text">nothing hurt today</div>
+        </div>
+        <div class="glimpse-entry">
+          <div class="glimpse-entry-date">apr 21</div>
+          <div class="glimpse-entry-text">finished the book</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- questions -->
+  <section class="section questions">
+    <div class="section-label">questions</div>
+    <div class="q">
+      <div class="q-text">What does it actually do?</div>
+      <div class="a-text">Asks you one question a day. You answer in a sentence. After a few months, you have a quiet record of your ordinary life.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Where does my data go?</div>
+      <div class="a-text">Nowhere. Entries stay on your phone. We've never seen a single one. There are no servers to leak, no accounts to hack.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">How often will it bother me?</div>
+      <div class="a-text">Once a day, at a time you choose. The notification is one word. That's the only one Enough will ever send.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">Why does it cost $9?</div>
+      <div class="a-text">Because nothing is free. We'd rather you pay us once than have you become the product. No subscription, no upgrades, no ads — ever.</div>
+    </div>
+    <div class="q">
+      <div class="q-text">What if I miss a day?</div>
+      <div class="a-text">Nothing happens. There are no streaks to break. Come back when you come back.</div>
+    </div>
+  </section>
+
+  <!-- what this isn't -->
+  <section class="section nots">
+    <div class="section-label">what this isn't</div>
+    <ul class="nots-list">
+      <li>no streaks</li>
+      <li>no metrics</li>
+      <li>no sharing</li>
+      <li>no notifications that guilt you</li>
+      <li>no ai telling you what your life means</li>
+      <li>no upsells, no upgrades, no ads</li>
+    </ul>
+  </section>
+
+  <!-- closing -->
+  <section class="closing">
+    <div class="closing-line">A small, finished thing.<br>For people who already have enough.</div>
+    <a href="#" class="cta">
+      <span class="cta-mark"></span>
+      <span>download for ios</span>
+    </a>
+    <div class="cta-price" style="margin-top: 1rem;">$9.99 · pay once · iphone</div>
+  </section>
+
+  <!-- footer -->
+  <footer>
+    <div class="left">made quietly · 2026</div>
+    <div class="right">
+      <a href="mailto:hello@enough.app">contact</a>
+      <a href="#">privacy</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
